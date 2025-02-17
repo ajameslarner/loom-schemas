@@ -1,0 +1,225 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "version": {
+        "type": "string",
+        "description": "Specified configuration version (e.g. apps/v1). This should follow the pattern 'name/v<number>', where 'name' is a word and 'number' is a version number.",
+        "pattern": "^\\w+/v\\d+$"
+      },
+      "name": {
+        "type": "string",
+        "description": "The name of the configuration. This is a human-readable identifier for the configuration."
+      },
+      "profiles": {
+        "type": "array",
+        "description": "Application Environment Profiles (e.g. Development, Preprod etc). Each profile represents a different environment configuration.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the profile. This should be a unique identifier for the profile."
+            },
+            "providers": {
+              "type": "object",
+              "description": "Application Source Providers. This section defines the providers for secrets and containers used by the application.",
+              "properties": {
+                "secrets": {
+                  "type": "array",
+                  "description": "Application Secret Providers. This section lists the providers that manage secrets for the application.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the secret provider. This should be a unique identifier for the provider."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Type of the secrets provider. This should be one of the predefined types (e.g., AzureKeyVault, SecretsManager).",
+                        "enum": ["AzureKeyVault", "SecretsManager"]
+                      },
+                      "config": {
+                        "type": "object",
+                        "description": "Configuration details for the service provider. This section contains provider-specific configuration settings."
+                      }
+                    },
+                    "required": ["name", "type", "config"]
+                  }
+                },
+                "containers": {
+                  "type": "array",
+                  "description": "Application Container Providers. This section lists the providers that manage containers for the application.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the container provider. This should be a unique identifier for the provider."
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Type of the container provider. This should be one of the predefined types (e.g., Docker).",
+                        "enum": ["Docker"]
+                      },
+                      "config": {
+                        "type": "object",
+                        "description": "Configuration details for the container provider. This section contains provider-specific configuration settings."
+                      }
+                    },
+                    "required": ["name", "type", "config"]
+                  }
+                }
+              }
+            },
+            "settings": {
+              "type": "object",
+              "description": "Application Settings. This section defines the environment variables and other settings for the application.",
+              "properties": {
+                "env": {
+                  "type": "array",
+                  "description": "Application Environment Variables. This section lists the environment variables that should be set for the application.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the environment variable. This should be a unique identifier for the variable."
+                      },
+                      "value": {
+                        "type": "string",
+                        "description": "Value of the environment variable. This is the value that will be set for the variable."
+                      },
+                      "valueFrom": {
+                        "type": "object",
+                        "description": "Source of the environment variable value. This section defines where the value of the environment variable should be sourced from.",
+                        "properties": {
+                          "secrets": {
+                            "type": "object",
+                            "description": "Secrets provider for the environment variable. This section defines the secrets provider and key to retrieve the value.",
+                            "properties": {
+                              "source": {
+                                "type": "string",
+                                "description": "Name of the secrets source provider. This should be a unique identifier for the provider."
+                              },
+                              "key": {
+                                "type": "string",
+                                "description": "Key to retrieve the secret value. This is the key used to fetch the value from the secrets provider."
+                              }
+                            },
+                            "required": ["source", "key"]
+                          }
+                        }
+                      }
+                    },
+                    "required": ["name"]
+                  }
+                }
+              }
+            },
+            "dependencies": {
+              "type": "object",
+              "description": "Application Dependencies. This section defines the services and other dependencies required by the application.",
+              "properties": {
+                "services": {
+                  "type": "array",
+                  "description": "Application Service Dependencies. This section lists the services that the application depends on.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "description": "Name of the dependent service. This should be a unique identifier for the service."
+                      },
+                      "container": {
+                        "type": "object",
+                        "description": "Container configuration for the dependent service. This section defines the container settings for the service.",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "description": "Container source provider name. This should be a unique identifier for the provider."
+                          },
+                          "image": {
+                            "type": "string",
+                            "description": "Container image name. This is the name of the container image to be used."
+                          },
+                          "ports": {
+                            "type": "array",
+                            "description": "List of ports exposed by the container. This section lists the ports that the container will expose.",
+                            "items": {
+                              "type": "string",
+                              "description": "Port number. This is the port number that will be exposed."
+                            }
+                          },
+                          "env": {
+                            "type": "array",
+                            "description": "Environment variables for the container. This section lists the environment variables that should be set for the container.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "description": "Name of the environment variable. This should be a unique identifier for the variable."
+                                },
+                                "value": {
+                                  "type": "string",
+                                  "description": "Value of the environment variable. This is the value that will be set for the variable."
+                                }
+                              },
+                              "required": ["name", "value"]
+                            }
+                          },
+                          "volumes": {
+                            "type": "array",
+                            "description": "Volumes mounted in the container. This section lists the volumes that will be mounted in the container.",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "description": "Type of the volume. This is the type of volume to be mounted."
+                                },
+                                "source": {
+                                  "type": "string",
+                                  "description": "Source of the volume. This is the source from where the volume will be mounted."
+                                },
+                                "target": {
+                                  "type": "string",
+                                  "description": "Target mount point in the container. This is the path inside the container where the volume will be mounted."
+                                }
+                              },
+                              "required": ["type", "source", "target"]
+                            }
+                          }
+                        },
+                        "required": ["source", "image", "ports"]
+                      }
+                    },
+                    "required": ["name", "container"]
+                  }
+                }
+              }
+            },
+            "entrypoint": {
+              "type": "object",
+              "description": "Entrypoint configuration for the profile blueprint. This section defines the command that will be executed as the entrypoint for the profile.",
+              "properties": {
+                "exec": {
+                  "type": "array",
+                  "description": "Command to execute as the entrypoint. This section lists the command and its arguments.",
+                  "items": {
+                    "type": "string",
+                    "description": "Command or argument. This is a part of the command to be executed."
+                  }
+                }
+              },
+              "required": ["exec"]
+            }
+          },
+          "required": ["name", "providers", "settings", "dependencies", "entrypoint"]
+        }
+      }
+    },
+    "required": ["version", "name", "profiles"]
+  }
